@@ -1,0 +1,53 @@
+name: spfeastBans
+version: ${version}
+main: com.andyoctopus.spfeastbans.SpfeastBansPlugin
+api-version: '1.21'
+authors: [AndyOctopus, YZ_Ljc_]
+description: Real ban plugin for Paper and Purpur 1.21+
+commands:
+  ban:
+    description: Permanently ban a player with a template.
+    usage: /ban <player> <template> [reason...]
+    permission: spfeastbans.ban
+  tempban:
+    description: Temporarily ban a player with a template.
+    usage: /tempban <player> <template> <duration> [reason...]
+    permission: spfeastbans.tempban
+  unban:
+    description: Unban a player.
+    usage: /unban <player|uuid>
+    permission: spfeastbans.unban
+  tempmute:
+    description: Temporarily mute a player with a reason key.
+    usage: /tempmute <player> <reasonKey> [time]
+    permission: spfeastbans.tempmute
+  unmute:
+    description: Unmute a player.
+    usage: /unmute <player|uuid>
+    permission: spfeastbans.unmute
+  baninfo:
+    description: Show current ban information.
+    usage: /baninfo <player|uuid>
+    permission: spfeastbans.info
+  banlist:
+    description: List active bans by page or type.
+    usage: /banlist [type] [page]
+    permission: spfeastbans.list
+permissions:
+  spfeastbans.ban:
+    default: op
+  spfeastbans.tempban:
+    default: op
+  spfeastbans.unban:
+    default: op
+  spfeastbans.tempmute:
+    default: op
+  spfeastbans.unmute:
+    default: op
+  spfeastbans.info:
+    default: op
+  spfeastbans.list:
+    default: op
+  spfeastbans.staffview:
+    default: op
+
