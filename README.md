@@ -2,6 +2,8 @@
 
 spfeastBans 是一个面向 **Paper / Purpur 1.21+** 的封禁与禁言插件，保留了原项目里的 Hypixel 风格处罚文案，并补全了历史查询、分页展示、上线通知和 YAML 持久化。
 
+本项目根据 `https://github.com/YzLjc-Team/YzljcBans-Mod` 进行更改。
+
 ## 功能概览
 - 支持封禁：永久封禁、临时封禁、解封、信息查询、活动处罚列表
 - 支持禁言：临时禁言、解禁、信息查询、聊天拦截提示
