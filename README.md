@@ -132,7 +132,7 @@ Windows:
 
 ### 产物
 - Gradle 默认产物名称：`spfeastbans-purpur-<version>.jar`
-- 当前项目版本：`2.0.1-SNAPSHOT`
+- 当前项目版本：`3.0.0`
 
 ## 兼容性
 - 平台：Paper / Purpur
