@@ -29,6 +29,6 @@ public final class PlayerChatListener implements Listener {
 
         MuteEntry entry = entryOptional.get();
         event.setCancelled(true);
-        Bukkit.getScheduler().runTask(plugin, () -> muteService.sendMuteNotificationIfPending(event.getPlayer(), entry));
+        Bukkit.getScheduler().runTask(plugin, () -> muteService.sendMuteMessage(event.getPlayer(), entry));
     }
 }

@@ -5,6 +5,7 @@ import com.andyoctopus.spfeastbans.ban.BanService;
 import com.andyoctopus.spfeastbans.mute.MuteEntry;
 import com.andyoctopus.spfeastbans.mute.MuteReason;
 import com.andyoctopus.spfeastbans.mute.MuteService;
+import com.andyoctopus.spfeastbans.punishment.PunishmentHistoryEntry;
 import com.andyoctopus.spfeastbans.punishment.PunishmentListEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -140,6 +141,23 @@ public final class CommandMessages {
         return BANLIST_PAGE_SIZE;
     }
 
+    public static void sendPunishmentHistory(CommandSender sender, String playerName, List<PunishmentHistoryEntry> entries) {
+        sender.sendMessage(color("&9&m--------------------------------------------------"));
+        sender.sendMessage(color("&6&lPunishment History &8\u00BB &e" + playerName));
+        sender.sendMessage(color("&7Found &f" + entries.size() + " &7historical entries"));
+        sender.sendMessage(color("&9&m--------------------------------------------------"));
+        for (int i = 0; i < entries.size(); i++) {
+            PunishmentHistoryEntry entry = entries.get(i);
+            int displayIndex = i + 1;
+            sender.sendMessage(buildHistoryHeader(entry, displayIndex));
+            sender.sendMessage(color("&7  Issued: &f" + entry.createdAtText() + " &8| &7By: &f" + entry.actor()));
+            sender.sendMessage(color("&7  Expires: &f" + entry.expiresAtText()));
+            sender.sendMessage(color("&7  Details: &f" + entry.detailText()));
+            sender.sendMessage(color("&7  " + entry.referenceLabel() + ": &f#" + entry.referenceId() + " &8| &7UUID: &f" + entry.uniqueId()));
+        }
+        sender.sendMessage(color("&9&m--------------------------------------------------"));
+    }
+
     private static String rankColor(int index) {
         return switch (index % 4) {
             case 1 -> "&c&l";
@@ -155,6 +173,16 @@ public final class CommandMessages {
                 .append(Component.text(entry.playerName(), NamedTextColor.AQUA)
                         .clickEvent(ClickEvent.runCommand("/baninfo " + entry.playerName()))
                         .hoverEvent(HoverEvent.showText(Component.text("Click to view /baninfo " + entry.playerName(), NamedTextColor.GRAY))))
+                .append(Component.text(" [" + entry.listTag() + "]", NamedTextColor.DARK_GRAY))
+                .build();
+    }
+
+    private static Component buildHistoryHeader(PunishmentHistoryEntry entry, int displayIndex) {
+        return Component.text()
+                .append(Component.text("#" + displayIndex + " ", legacyColor(rankColor(displayIndex))).decoration(TextDecoration.BOLD, true))
+                .append(Component.text(entry.playerName(), NamedTextColor.AQUA)
+                        .clickEvent(ClickEvent.runCommand("/history " + entry.playerName()))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to run /history " + entry.playerName(), NamedTextColor.GRAY))))
                 .append(Component.text(" [" + entry.listTag() + "]", NamedTextColor.DARK_GRAY))
                 .build();
     }

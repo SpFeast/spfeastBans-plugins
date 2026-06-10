@@ -6,6 +6,7 @@ import com.andyoctopus.spfeastbans.ban.BanStorage;
 import com.andyoctopus.spfeastbans.command.BanCommand;
 import com.andyoctopus.spfeastbans.command.BanInfoCommand;
 import com.andyoctopus.spfeastbans.command.BanListCommand;
+import com.andyoctopus.spfeastbans.command.HistoryCommand;
 import com.andyoctopus.spfeastbans.command.TempMuteCommand;
 import com.andyoctopus.spfeastbans.command.UnbanCommand;
 import com.andyoctopus.spfeastbans.command.UnmuteCommand;
@@ -86,6 +87,7 @@ public final class SpfeastBansPlugin extends JavaPlugin {
         UnmuteCommand unmuteCommand = new UnmuteCommand(this);
         BanInfoCommand banInfoCommand = new BanInfoCommand(this);
         BanListCommand banListCommand = new BanListCommand(this);
+        HistoryCommand historyCommand = new HistoryCommand(this);
 
         requireCommand("ban").setExecutor(banCommand);
         requireCommand("ban").setTabCompleter(banCommand);
@@ -101,6 +103,8 @@ public final class SpfeastBansPlugin extends JavaPlugin {
         requireCommand("baninfo").setTabCompleter(banInfoCommand);
         requireCommand("banlist").setExecutor(banListCommand);
         requireCommand("banlist").setTabCompleter(banListCommand);
+        requireCommand("history").setExecutor(historyCommand);
+        requireCommand("history").setTabCompleter(historyCommand);
     }
 
     private PluginCommand requireCommand(String name) {

@@ -174,6 +174,12 @@ public final class BanService {
         return filtered;
     }
 
+    public List<BanEntry> getBanHistory() {
+        List<BanEntry> entries = new ArrayList<>(historyStorage.getAll());
+        entries.sort(Comparator.comparingLong(BanEntry::getCreatedAtMillis).reversed());
+        return entries;
+    }
+
     public String buildKickMessage(BanEntry entry) {
         BanTemplate template = BanTemplates.get(entry.getTemplateKey());
         if (template == null) {

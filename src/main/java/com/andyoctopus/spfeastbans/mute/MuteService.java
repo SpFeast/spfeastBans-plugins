@@ -140,6 +140,12 @@ public final class MuteService {
         return filtered;
     }
 
+    public List<MuteEntry> getMuteHistory() {
+        List<MuteEntry> entries = new ArrayList<>(historyStorage.getAll());
+        entries.sort(Comparator.comparingLong(MuteEntry::getCreatedAtMillis).reversed());
+        return entries;
+    }
+
     public String formatCreatedAt(MuteEntry entry) {
         return formatInstant(entry.getCreatedAtMillis());
     }
