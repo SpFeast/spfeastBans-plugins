@@ -141,12 +141,18 @@ public final class CommandMessages {
         return BANLIST_PAGE_SIZE;
     }
 
-    public static void sendPunishmentHistory(CommandSender sender, String playerName, List<PunishmentHistoryEntry> entries) {
+    public static void sendPunishmentHistory(CommandSender sender, String playerName, List<PunishmentHistoryEntry> entries, int page) {
+        int totalPages = (int) Math.ceil(entries.size() / (double) BANLIST_PAGE_SIZE);
+        int safePage = Math.max(1, Math.min(page, totalPages));
+        int start = (safePage - 1) * BANLIST_PAGE_SIZE;
+        int end = Math.min(start + BANLIST_PAGE_SIZE, entries.size());
+        String listCommandBase = "/history " + playerName;
+
         sender.sendMessage(color("&9&m--------------------------------------------------"));
-        sender.sendMessage(color("&6&lPunishment History &8\u00BB &e" + playerName));
-        sender.sendMessage(color("&7Found &f" + entries.size() + " &7historical entries"));
+        sender.sendMessage(color("&6&lPunishment History &8\u00BB &e" + playerName + " &7(Page &f" + safePage + "&7/&f" + totalPages + "&7)"));
+        sender.sendMessage(color("&7Showing &f" + (start + 1) + "&7-&f" + end + " &7of &f" + entries.size() + " &7historical entries"));
         sender.sendMessage(color("&9&m--------------------------------------------------"));
-        for (int i = 0; i < entries.size(); i++) {
+        for (int i = start; i < end; i++) {
             PunishmentHistoryEntry entry = entries.get(i);
             int displayIndex = i + 1;
             sender.sendMessage(buildHistoryHeader(entry, displayIndex));
@@ -154,6 +160,18 @@ public final class CommandMessages {
             sender.sendMessage(color("&7  Expires: &f" + entry.expiresAtText()));
             sender.sendMessage(color("&7  Details: &f" + entry.detailText()));
             sender.sendMessage(color("&7  " + entry.referenceLabel() + ": &f#" + entry.referenceId() + " &8| &7UUID: &f" + entry.uniqueId()));
+        }
+
+        if (safePage > 1) {
+            sender.sendMessage(buildPagerButton("Previous Page", listCommandBase + " " + (safePage - 1), NamedTextColor.YELLOW));
+        } else {
+            sender.sendMessage(color("&8Previous Page &8\u00BB &7None"));
+        }
+
+        if (safePage < totalPages) {
+            sender.sendMessage(buildPagerButton("Next Page", listCommandBase + " " + (safePage + 1), NamedTextColor.GREEN));
+        } else {
+            sender.sendMessage(color("&8Next Page &8\u00BB &7None"));
         }
         sender.sendMessage(color("&9&m--------------------------------------------------"));
     }

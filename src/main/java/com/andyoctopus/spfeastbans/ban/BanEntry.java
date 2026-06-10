@@ -14,6 +14,8 @@ public final class BanEntry {
     private final String numericId;
     private final long createdAtMillis;
     private final long expiresAtMillis;
+    private final long originalDurationMillis;
+    private final boolean pendingActivation;
 
     public BanEntry(UUID uniqueId,
                     String playerName,
@@ -24,6 +26,20 @@ public final class BanEntry {
                     String numericId,
                     long createdAtMillis,
                     long expiresAtMillis) {
+        this(uniqueId, playerName, templateKey, reason, actor, banId, numericId, createdAtMillis, expiresAtMillis, -1L, false);
+    }
+
+    public BanEntry(UUID uniqueId,
+                    String playerName,
+                    String templateKey,
+                    String reason,
+                    String actor,
+                    String banId,
+                    String numericId,
+                    long createdAtMillis,
+                    long expiresAtMillis,
+                    long originalDurationMillis,
+                    boolean pendingActivation) {
         this.uniqueId = uniqueId;
         this.playerName = playerName;
         this.templateKey = templateKey;
@@ -33,6 +49,8 @@ public final class BanEntry {
         this.numericId = numericId;
         this.createdAtMillis = createdAtMillis;
         this.expiresAtMillis = expiresAtMillis;
+        this.originalDurationMillis = originalDurationMillis;
+        this.pendingActivation = pendingActivation;
     }
 
     public UUID getUniqueId() {
@@ -71,12 +89,39 @@ public final class BanEntry {
         return expiresAtMillis;
     }
 
+    public long getOriginalDurationMillis() {
+        return originalDurationMillis;
+    }
+
+    public boolean isPendingActivation() {
+        return pendingActivation;
+    }
+
     public boolean isPermanent() {
         return expiresAtMillis < 0L;
     }
 
     public boolean isExpired(long now) {
-        return !isPermanent() && expiresAtMillis <= now;
+        return !pendingActivation && !isPermanent() && expiresAtMillis <= now;
+    }
+
+    public BanEntry activate(long now) {
+        if (!pendingActivation || originalDurationMillis <= 0L) {
+            return this;
+        }
+        return new BanEntry(
+                uniqueId,
+                playerName,
+                templateKey,
+                reason,
+                actor,
+                banId,
+                numericId,
+                now,
+                now + originalDurationMillis,
+                originalDurationMillis,
+                false
+        );
     }
 
     public void writeTo(ConfigurationSection section) {
@@ -88,6 +133,8 @@ public final class BanEntry {
         section.set("numeric-id", numericId);
         section.set("created-at", createdAtMillis);
         section.set("expires-at", expiresAtMillis);
+        section.set("original-duration", originalDurationMillis);
+        section.set("pending-activation", pendingActivation);
     }
 
     public void writeToHistory(ConfigurationSection section) {
@@ -105,7 +152,9 @@ public final class BanEntry {
         String numericId = section.getString("numeric-id", "000000");
         long createdAt = section.getLong("created-at", System.currentTimeMillis());
         long expiresAt = section.getLong("expires-at", -1L);
-        return new BanEntry(uniqueId, playerName, templateKey, reason, actor, banId, numericId, createdAt, expiresAt);
+        long originalDuration = section.getLong("original-duration", -1L);
+        boolean pendingActivation = section.getBoolean("pending-activation", false);
+        return new BanEntry(uniqueId, playerName, templateKey, reason, actor, banId, numericId, createdAt, expiresAt, originalDuration, pendingActivation);
     }
 
     public static BanEntry fromHistory(ConfigurationSection section) {
@@ -118,7 +167,9 @@ public final class BanEntry {
         String numericId = section.getString("numeric-id", "000000");
         long createdAt = section.getLong("created-at", System.currentTimeMillis());
         long expiresAt = section.getLong("expires-at", -1L);
-        return new BanEntry(uniqueId, playerName, templateKey, reason, actor, banId, numericId, createdAt, expiresAt);
+        long originalDuration = section.getLong("original-duration", -1L);
+        boolean pendingActivation = section.getBoolean("pending-activation", false);
+        return new BanEntry(uniqueId, playerName, templateKey, reason, actor, banId, numericId, createdAt, expiresAt, originalDuration, pendingActivation);
     }
 }
 

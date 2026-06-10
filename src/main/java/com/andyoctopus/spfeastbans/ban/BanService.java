@@ -41,6 +41,12 @@ public final class BanService {
     }
 
     public BanEntry ban(UUID uniqueId, String playerName, String templateKey, String reason, String actor, long expiresAtMillis) {
+        long now = System.currentTimeMillis();
+        Player onlinePlayer = Bukkit.getPlayer(uniqueId);
+        boolean online = onlinePlayer != null && onlinePlayer.isOnline();
+        boolean temporary = expiresAtMillis >= 0L;
+        long originalDurationMillis = temporary ? Math.max(0L, expiresAtMillis - now) : -1L;
+        boolean pendingActivation = temporary && !online;
         BanEntry entry = new BanEntry(
                 uniqueId,
                 playerName,
@@ -49,8 +55,10 @@ public final class BanService {
                 actor,
                 generateBanId(),
                 generateNumericId(),
-                System.currentTimeMillis(),
-                expiresAtMillis
+                now,
+                expiresAtMillis,
+                originalDurationMillis,
+                pendingActivation
         );
         storage.put(entry);
         storage.save();
@@ -76,6 +84,29 @@ public final class BanService {
         }
 
         if (entry.isExpired(System.currentTimeMillis())) {
+            storage.remove(uniqueId);
+            storage.save();
+            return Optional.empty();
+        }
+
+        return Optional.of(entry);
+    }
+
+    public Optional<BanEntry> resolveBanForLogin(UUID uniqueId) {
+        BanEntry entry = storage.get(uniqueId);
+        if (entry == null) {
+            return Optional.empty();
+        }
+
+        long now = System.currentTimeMillis();
+        if (entry.isPendingActivation()) {
+            entry = entry.activate(now);
+            storage.put(entry);
+            storage.save();
+            return Optional.of(entry);
+        }
+
+        if (entry.isExpired(now)) {
             storage.remove(uniqueId);
             storage.save();
             return Optional.empty();
@@ -154,12 +185,23 @@ public final class BanService {
 
     public int getActiveBanCount() {
         cleanupExpiredBans();
-        return storage.getAll().size();
+        int count = 0;
+        for (BanEntry entry : storage.getAll()) {
+            if (!entry.isPendingActivation()) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public List<BanEntry> getActiveBans() {
         cleanupExpiredBans();
-        List<BanEntry> entries = new ArrayList<>(storage.getAll());
+        List<BanEntry> entries = new ArrayList<>();
+        for (BanEntry entry : storage.getAll()) {
+            if (!entry.isPendingActivation()) {
+                entries.add(entry);
+            }
+        }
         entries.sort(Comparator.comparingLong(BanEntry::getCreatedAtMillis).reversed());
         return entries;
     }
@@ -210,6 +252,9 @@ public final class BanService {
     }
 
     public String formatExpiresAt(BanEntry entry) {
+        if (entry.isPendingActivation()) {
+            return "starts on next login";
+        }
         if (entry.isPermanent()) {
             return plugin.getConfig().getString("permanent-text", "permanent");
         }
@@ -217,6 +262,9 @@ public final class BanService {
     }
 
     public String formatRemaining(BanEntry entry) {
+        if (entry.isPendingActivation()) {
+            return DurationParser.formatDuration(entry.getOriginalDurationMillis());
+        }
         if (entry.isPermanent()) {
             return plugin.getConfig().getString("permanent-text", "permanent");
         }

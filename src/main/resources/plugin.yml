@@ -35,7 +35,7 @@ commands:
     permission: spfeastbans.list
   history:
     description: Show punishment history for a player.
-    usage: /history <player>
+    usage: /history <player> [page]
     permission: spfeastbans.history
 permissions:
   spfeastbans.ban:

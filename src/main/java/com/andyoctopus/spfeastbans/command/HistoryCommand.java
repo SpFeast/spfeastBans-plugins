@@ -33,14 +33,22 @@ public final class HistoryCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length != 1) {
-            CommandMessages.sendUsage(sender, label, "[Player]");
+        if (args.length < 1 || args.length > 2) {
+            CommandMessages.sendUsage(sender, label, "[Player] [Page]");
             return true;
         }
 
         BanService banService = plugin.getBanService();
         MuteService muteService = plugin.getMuteService();
         String query = args[0];
+        int page = 1;
+        if (args.length == 2) {
+            if (!isInteger(args[1])) {
+                CommandMessages.sendFailure(sender, "Page must be a number.");
+                return true;
+            }
+            page = parsePage(args[1], 1);
+        }
         Optional<BanService.ResolvedTarget> resolvedTarget = banService.resolveTarget(query);
         UUID resolvedUniqueId = resolvedTarget.map(BanService.ResolvedTarget::uniqueId).orElseGet(() -> tryParseUuid(query));
         String displayName = resolvedTarget.map(BanService.ResolvedTarget::playerName).orElse(query);
@@ -86,27 +94,89 @@ public final class HistoryCommand implements TabExecutor {
             return true;
         }
 
-        CommandMessages.sendPunishmentHistory(sender, displayName, entries);
+        CommandMessages.sendPunishmentHistory(sender, displayName, entries, page);
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length != 1) {
-            return Collections.emptyList();
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase(Locale.ROOT);
+            List<String> matches = new ArrayList<>();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
+                    matches.add(player.getName());
+                }
+            }
+            for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+                String name = offlinePlayer.getName();
+                if (name != null && name.toLowerCase(Locale.ROOT).startsWith(prefix) && !matches.contains(name)) {
+                    matches.add(name);
+                }
+            }
+            return matches;
         }
 
-        String prefix = args[0].toLowerCase(Locale.ROOT);
-        List<String> matches = new ArrayList<>();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                matches.add(player.getName());
+        if (args.length == 2) {
+            List<PunishmentHistoryEntry> entries = collectEntries(args[0]);
+            return pageSuggestions(args[1], entries.size());
+        }
+
+        return Collections.emptyList();
+    }
+
+    private List<PunishmentHistoryEntry> collectEntries(String query) {
+        BanService banService = plugin.getBanService();
+        MuteService muteService = plugin.getMuteService();
+        Optional<BanService.ResolvedTarget> resolvedTarget = banService.resolveTarget(query);
+        UUID resolvedUniqueId = resolvedTarget.map(BanService.ResolvedTarget::uniqueId).orElseGet(() -> tryParseUuid(query));
+
+        List<PunishmentHistoryEntry> entries = new ArrayList<>();
+        for (BanEntry entry : banService.getBanHistory()) {
+            if (matches(entry.getUniqueId(), entry.getPlayerName(), resolvedUniqueId, query)) {
+                entries.add(new PunishmentHistoryEntry(
+                        PunishmentListEntry.Type.BAN,
+                        entry.getUniqueId(),
+                        entry.getPlayerName(),
+                        entry.getTemplateKey(),
+                        entry.getActor(),
+                        entry.getBanId(),
+                        entry.getCreatedAtMillis(),
+                        banService.formatCreatedAt(entry),
+                        banService.formatExpiresAt(entry),
+                        safe(entry.getReason())
+                ));
             }
         }
-        for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-            String name = offlinePlayer.getName();
-            if (name != null && name.toLowerCase(Locale.ROOT).startsWith(prefix) && !matches.contains(name)) {
-                matches.add(name);
+        for (MuteEntry entry : muteService.getMuteHistory()) {
+            if (matches(entry.getUniqueId(), entry.getPlayerName(), resolvedUniqueId, query)) {
+                MuteReason reason = MuteReason.get(entry.getReasonKey());
+                entries.add(new PunishmentHistoryEntry(
+                        PunishmentListEntry.Type.MUTE,
+                        entry.getUniqueId(),
+                        entry.getPlayerName(),
+                        entry.getReasonKey(),
+                        entry.getActor(),
+                        entry.getMuteId(),
+                        entry.getCreatedAtMillis(),
+                        muteService.formatCreatedAt(entry),
+                        muteService.formatExpiresAt(entry),
+                        reason == null ? entry.getReasonKey() : reason.getStaffSummary()
+                ));
+            }
+        }
+        entries.sort(Comparator.comparingLong(PunishmentHistoryEntry::createdAtMillis).reversed());
+        return entries;
+    }
+
+    private List<String> pageSuggestions(String input, int totalEntries) {
+        int totalPages = Math.max(1, (int) Math.ceil(totalEntries / (double) CommandMessages.getBanListPageSize()));
+        String prefix = input.toLowerCase(Locale.ROOT);
+        List<String> matches = new ArrayList<>();
+        for (int currentPage = 1; currentPage <= totalPages; currentPage++) {
+            String value = Integer.toString(currentPage);
+            if (value.startsWith(prefix)) {
+                matches.add(value);
             }
         }
         return matches;
@@ -124,6 +194,23 @@ public final class HistoryCommand implements TabExecutor {
             return UUID.fromString(input);
         } catch (IllegalArgumentException ignored) {
             return null;
+        }
+    }
+
+    private boolean isInteger(String input) {
+        try {
+            Integer.parseInt(input);
+            return true;
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
+    }
+
+    private int parsePage(String input, int fallback) {
+        try {
+            return Math.max(1, Integer.parseInt(input));
+        } catch (NumberFormatException ignored) {
+            return fallback;
         }
     }
 

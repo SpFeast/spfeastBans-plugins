@@ -18,7 +18,7 @@ public final class PlayerLoginListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLogin(PlayerLoginEvent event) {
-        Optional<BanEntry> entryOptional = banService.findActiveBan(event.getPlayer().getUniqueId());
+        Optional<BanEntry> entryOptional = banService.resolveBanForLogin(event.getPlayer().getUniqueId());
         if (entryOptional.isEmpty()) {
             return;
         }
