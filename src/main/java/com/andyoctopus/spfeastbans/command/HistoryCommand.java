@@ -52,6 +52,7 @@ public final class HistoryCommand implements TabExecutor {
         Optional<BanService.ResolvedTarget> resolvedTarget = banService.resolveTarget(query);
         UUID resolvedUniqueId = resolvedTarget.map(BanService.ResolvedTarget::uniqueId).orElseGet(() -> tryParseUuid(query));
         String displayName = resolvedTarget.map(BanService.ResolvedTarget::playerName).orElse(query);
+        String commandQuery = resolvedUniqueId == null ? query : resolvedUniqueId.toString();
 
         List<PunishmentHistoryEntry> entries = new ArrayList<>();
         for (BanEntry entry : banService.getBanHistory()) {
@@ -94,7 +95,7 @@ public final class HistoryCommand implements TabExecutor {
             return true;
         }
 
-        CommandMessages.sendPunishmentHistory(sender, displayName, entries, page);
+        CommandMessages.sendPunishmentHistory(sender, displayName, commandQuery, entries, page);
         return true;
     }
 

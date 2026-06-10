@@ -123,17 +123,10 @@ public final class CommandMessages {
             sender.sendMessage(buildBanListActions(entry));
         }
 
-        if (safePage > 1) {
-            sender.sendMessage(buildPagerButton("Previous Page", listCommandBase + " " + (safePage - 1), NamedTextColor.YELLOW));
-        } else {
-            sender.sendMessage(color("&8Previous Page &8\u00BB &7None"));
-        }
-
-        if (safePage < totalPages) {
-            sender.sendMessage(buildPagerButton("Next Page", listCommandBase + " " + (safePage + 1), NamedTextColor.GREEN));
-        } else {
-            sender.sendMessage(color("&8Next Page &8\u00BB &7None"));
-        }
+        sender.sendMessage(buildPagerBar(
+                safePage > 1 ? listCommandBase + " " + (safePage - 1) : null,
+                safePage < totalPages ? listCommandBase + " " + (safePage + 1) : null
+        ));
         sender.sendMessage(color("&9&m--------------------------------------------------"));
     }
 
@@ -141,12 +134,12 @@ public final class CommandMessages {
         return BANLIST_PAGE_SIZE;
     }
 
-    public static void sendPunishmentHistory(CommandSender sender, String playerName, List<PunishmentHistoryEntry> entries, int page) {
+    public static void sendPunishmentHistory(CommandSender sender, String playerName, String commandQuery, List<PunishmentHistoryEntry> entries, int page) {
         int totalPages = (int) Math.ceil(entries.size() / (double) BANLIST_PAGE_SIZE);
         int safePage = Math.max(1, Math.min(page, totalPages));
         int start = (safePage - 1) * BANLIST_PAGE_SIZE;
         int end = Math.min(start + BANLIST_PAGE_SIZE, entries.size());
-        String listCommandBase = "/history " + playerName;
+        String listCommandBase = "/history " + commandQuery;
 
         sender.sendMessage(color("&9&m--------------------------------------------------"));
         sender.sendMessage(color("&6&lPunishment History &8\u00BB &e" + playerName + " &7(Page &f" + safePage + "&7/&f" + totalPages + "&7)"));
@@ -155,24 +148,17 @@ public final class CommandMessages {
         for (int i = start; i < end; i++) {
             PunishmentHistoryEntry entry = entries.get(i);
             int displayIndex = i + 1;
-            sender.sendMessage(buildHistoryHeader(entry, displayIndex));
+            sender.sendMessage(buildHistoryHeader(entry, displayIndex, commandQuery));
             sender.sendMessage(color("&7  Issued: &f" + entry.createdAtText() + " &8| &7By: &f" + entry.actor()));
             sender.sendMessage(color("&7  Expires: &f" + entry.expiresAtText()));
             sender.sendMessage(color("&7  Details: &f" + entry.detailText()));
             sender.sendMessage(color("&7  " + entry.referenceLabel() + ": &f#" + entry.referenceId() + " &8| &7UUID: &f" + entry.uniqueId()));
         }
 
-        if (safePage > 1) {
-            sender.sendMessage(buildPagerButton("Previous Page", listCommandBase + " " + (safePage - 1), NamedTextColor.YELLOW));
-        } else {
-            sender.sendMessage(color("&8Previous Page &8\u00BB &7None"));
-        }
-
-        if (safePage < totalPages) {
-            sender.sendMessage(buildPagerButton("Next Page", listCommandBase + " " + (safePage + 1), NamedTextColor.GREEN));
-        } else {
-            sender.sendMessage(color("&8Next Page &8\u00BB &7None"));
-        }
+        sender.sendMessage(buildPagerBar(
+                safePage > 1 ? listCommandBase + " " + (safePage - 1) : null,
+                safePage < totalPages ? listCommandBase + " " + (safePage + 1) : null
+        ));
         sender.sendMessage(color("&9&m--------------------------------------------------"));
     }
 
@@ -195,12 +181,12 @@ public final class CommandMessages {
                 .build();
     }
 
-    private static Component buildHistoryHeader(PunishmentHistoryEntry entry, int displayIndex) {
+    private static Component buildHistoryHeader(PunishmentHistoryEntry entry, int displayIndex, String commandQuery) {
         return Component.text()
                 .append(Component.text("#" + displayIndex + " ", legacyColor(rankColor(displayIndex))).decoration(TextDecoration.BOLD, true))
                 .append(Component.text(entry.playerName(), NamedTextColor.AQUA)
-                        .clickEvent(ClickEvent.runCommand("/history " + entry.playerName()))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to run /history " + entry.playerName(), NamedTextColor.GRAY))))
+                        .clickEvent(ClickEvent.runCommand("/history " + commandQuery))
+                        .hoverEvent(HoverEvent.showText(Component.text("Click to run /history " + commandQuery, NamedTextColor.GRAY))))
                 .append(Component.text(" [" + entry.listTag() + "]", NamedTextColor.DARK_GRAY))
                 .build();
     }
@@ -220,14 +206,19 @@ public final class CommandMessages {
                 .build();
     }
 
-    private static Component buildPagerButton(String label, String command, NamedTextColor accent) {
+    private static Component buildPagerBar(String previousCommand, String nextCommand) {
         return Component.text()
-                .append(Component.text(label + " ", accent))
-                .append(Component.text(">> ", NamedTextColor.DARK_GRAY))
-                .append(Component.text(command, NamedTextColor.WHITE)
-                        .clickEvent(ClickEvent.runCommand(command))
-                        .hoverEvent(HoverEvent.showText(Component.text("Click to run " + command, NamedTextColor.GRAY))))
+                .append(buildPagerControl("Previous Page", previousCommand, NamedTextColor.YELLOW))
+                .append(Component.text(" / ", NamedTextColor.DARK_GRAY))
+                .append(buildPagerControl("Next Page", nextCommand, NamedTextColor.GREEN))
                 .build();
+    }
+
+    private static Component buildPagerControl(String label, String command, NamedTextColor accent) {
+        if (command == null) {
+            return Component.text("[" + label + "]", NamedTextColor.DARK_GRAY);
+        }
+        return actionButton(label, command, accent, true, "Click to run " + command);
     }
 
     private static Component actionButton(String label, String command, NamedTextColor color, boolean runCommand, String hoverText) {
