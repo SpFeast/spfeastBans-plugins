@@ -15,11 +15,13 @@ public enum MuteReason {
             86_400_000L,
             "A report against you is currently under review.",
             List.of(
+                    "&c&m-----------------------------------------------------",
                     "&cA report against you is currently under review.",
                     "&7Your mute will expire in &f%DURATION%",
                     "&7",
                     "&7Find out more here: &e&nwww.spfeast.cn/mutes",
-                    "&7Mute ID: &f#%MUTEID%"
+                    "&7Mute ID: &f#%MUTEID%",
+                    "&c&m-----------------------------------------------------"
             ),
             "areport", "a_report", "a-report", "report", "reportreview", "review", "ur", "ar"
     ),
@@ -29,11 +31,13 @@ public enum MuteReason {
             86_400_000L,
             "You are currently muted for a Minor Chat Infraction.",
             List.of(
+                    "&c&m-----------------------------------------------------",
                     "&cYou are currently muted for a Minor Chat Infraction.",
                     "&7Your mute will expire in &f%DURATION%",
                     "&7",
                     "&7Find out more here: &e&nwww.spfeast.cn/mutes",
-                    "&7Mute ID: &f#%MUTEID%"
+                    "&7Mute ID: &f#%MUTEID%",
+                    "&c&m-----------------------------------------------------"
             ),
             "minor_chat", "minor-chat", "minor", "mc"
     ),
@@ -43,11 +47,13 @@ public enum MuteReason {
             604_800_000L,
             "You are currently muted for a Major Chat Infraction.",
             List.of(
+                    "&c&m-----------------------------------------------------",
                     "&cYou are currently muted for a Major Chat Infraction.",
                     "&7Your mute will expire in &f%DURATION%",
                     "&7",
                     "&7Find out more here: &e&nwww.spfeast.cn/mutes",
-                    "&7Mute ID: &f#%MUTEID%"
+                    "&7Mute ID: &f#%MUTEID%",
+                    "&c&m-----------------------------------------------------"
             ),
             "major_chat", "major-chat", "major", "maj", "mj"
     );

@@ -51,6 +51,10 @@ public final class MuteService {
         storage.save();
         historyStorage.append(entry);
         historyStorage.save();
+        Player player = plugin.getServer().getPlayer(uniqueId);
+        if (player != null && player.isOnline()) {
+            sendMuteNotificationIfPending(player, entry);
+        }
         return entry;
     }
 
@@ -160,6 +164,18 @@ public final class MuteService {
         for (String line : buildMuteLines(entry)) {
             player.sendMessage(line);
         }
+    }
+
+    public boolean sendMuteNotificationIfPending(Player player, MuteEntry entry) {
+        synchronized (entry) {
+            if (entry.isNotificationSent()) {
+                return false;
+            }
+            sendMuteMessage(player, entry);
+            entry.markNotificationSent();
+        }
+        storage.save();
+        return true;
     }
 
     public String describeMute(MuteEntry entry) {

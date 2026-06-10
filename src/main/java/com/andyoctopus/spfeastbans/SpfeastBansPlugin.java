@@ -10,6 +10,7 @@ import com.andyoctopus.spfeastbans.command.TempMuteCommand;
 import com.andyoctopus.spfeastbans.command.UnbanCommand;
 import com.andyoctopus.spfeastbans.command.UnmuteCommand;
 import com.andyoctopus.spfeastbans.listener.PlayerChatListener;
+import com.andyoctopus.spfeastbans.listener.PlayerJoinListener;
 import com.andyoctopus.spfeastbans.listener.PlayerLoginListener;
 import com.andyoctopus.spfeastbans.mute.MuteService;
 import com.andyoctopus.spfeastbans.mute.MuteHistoryStorage;
@@ -46,6 +47,7 @@ public final class SpfeastBansPlugin extends JavaPlugin {
         registerCommands();
         getServer().getPluginManager().registerEvents(new PlayerLoginListener(banService), this);
         getServer().getPluginManager().registerEvents(new PlayerChatListener(this, muteService), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, muteService), this);
         getServer().getScheduler().runTaskTimer(this, banService::cleanupExpiredBans, 20L * 60L, 20L * 300L);
         getServer().getScheduler().runTaskTimer(this, muteService::cleanupExpiredMutes, 20L * 60L, 20L * 300L);
 

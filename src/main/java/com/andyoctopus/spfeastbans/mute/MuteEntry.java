@@ -12,6 +12,7 @@ public final class MuteEntry {
     private final String muteId;
     private final long createdAtMillis;
     private final long expiresAtMillis;
+    private boolean notificationSent;
 
     public MuteEntry(UUID uniqueId,
                      String playerName,
@@ -20,6 +21,17 @@ public final class MuteEntry {
                      String muteId,
                      long createdAtMillis,
                      long expiresAtMillis) {
+        this(uniqueId, playerName, reasonKey, actor, muteId, createdAtMillis, expiresAtMillis, false);
+    }
+
+    public MuteEntry(UUID uniqueId,
+                     String playerName,
+                     String reasonKey,
+                     String actor,
+                     String muteId,
+                     long createdAtMillis,
+                     long expiresAtMillis,
+                     boolean notificationSent) {
         this.uniqueId = uniqueId;
         this.playerName = playerName;
         this.reasonKey = reasonKey;
@@ -27,6 +39,7 @@ public final class MuteEntry {
         this.muteId = muteId;
         this.createdAtMillis = createdAtMillis;
         this.expiresAtMillis = expiresAtMillis;
+        this.notificationSent = notificationSent;
     }
 
     public UUID getUniqueId() {
@@ -57,6 +70,14 @@ public final class MuteEntry {
         return expiresAtMillis;
     }
 
+    public boolean isNotificationSent() {
+        return notificationSent;
+    }
+
+    public void markNotificationSent() {
+        this.notificationSent = true;
+    }
+
     public boolean isExpired(long now) {
         return expiresAtMillis <= now;
     }
@@ -68,6 +89,7 @@ public final class MuteEntry {
         section.set("mute-id", muteId);
         section.set("created-at", createdAtMillis);
         section.set("expires-at", expiresAtMillis);
+        section.set("notification-sent", notificationSent);
     }
 
     public void writeToHistory(ConfigurationSection section) {
@@ -83,7 +105,8 @@ public final class MuteEntry {
         String muteId = section.getString("mute-id", "UNKNOWN");
         long createdAt = section.getLong("created-at", System.currentTimeMillis());
         long expiresAt = section.getLong("expires-at", System.currentTimeMillis());
-        return new MuteEntry(uniqueId, playerName, reasonKey, actor, muteId, createdAt, expiresAt);
+        boolean notificationSent = section.getBoolean("notification-sent", false);
+        return new MuteEntry(uniqueId, playerName, reasonKey, actor, muteId, createdAt, expiresAt, notificationSent);
     }
 
     public static MuteEntry fromHistory(ConfigurationSection section) {
@@ -94,6 +117,7 @@ public final class MuteEntry {
         String muteId = section.getString("mute-id", "UNKNOWN");
         long createdAt = section.getLong("created-at", System.currentTimeMillis());
         long expiresAt = section.getLong("expires-at", System.currentTimeMillis());
-        return new MuteEntry(uniqueId, playerName, reasonKey, actor, muteId, createdAt, expiresAt);
+        boolean notificationSent = section.getBoolean("notification-sent", false);
+        return new MuteEntry(uniqueId, playerName, reasonKey, actor, muteId, createdAt, expiresAt, notificationSent);
     }
 }
