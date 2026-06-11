@@ -181,7 +181,7 @@ public final class BanTemplates {
                 "&7Reason: &r&fBoosting your account to improve your stats.",
                 "&7Find out more: &b&n%APPEAL_URL%",
                 "&7",
-                "&7Ban ID: &f#banid%",
+                "&7Ban ID: &f#%banid%",
                 "&7Sharing your Ban ID may affect the processing of your appeal!"
         ));
 
