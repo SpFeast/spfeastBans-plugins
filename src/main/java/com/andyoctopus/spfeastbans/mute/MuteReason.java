@@ -19,7 +19,7 @@ public enum MuteReason {
                     "&cA report against you is currently under review.",
                     "&7Your mute will expire in &f%DURATION%",
                     "&7",
-                    "&7Find out more here: &e&nwww.spfeast.cn/mutes",
+                    "&7Find out more here: &e&n%MUTES_URL%",
                     "&7Mute ID: &f#%MUTEID%",
                     "&c&m-----------------------------------------------------"
             ),
@@ -35,7 +35,7 @@ public enum MuteReason {
                     "&cYou are currently muted for a Minor Chat Infraction.",
                     "&7Your mute will expire in &f%DURATION%",
                     "&7",
-                    "&7Find out more here: &e&nwww.spfeast.cn/mutes",
+                    "&7Find out more here: &e&n%MUTES_URL%",
                     "&7Mute ID: &f#%MUTEID%",
                     "&c&m-----------------------------------------------------"
             ),
@@ -51,7 +51,7 @@ public enum MuteReason {
                     "&cYou are currently muted for a Major Chat Infraction.",
                     "&7Your mute will expire in &f%DURATION%",
                     "&7",
-                    "&7Find out more here: &e&nwww.spfeast.cn/mutes",
+                    "&7Find out more here: &e&n%MUTES_URL%",
                     "&7Mute ID: &f#%MUTEID%",
                     "&c&m-----------------------------------------------------"
             ),

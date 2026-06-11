@@ -163,7 +163,17 @@ public final class MuteService {
         if (reason == null) {
             return List.of("\u00A7cYou are muted.");
         }
-        return reason.render(formatRemaining(entry), entry.getMuteId());
+        List<String> rendered = reason.render(formatRemaining(entry), entry.getMuteId());
+        String mutesUrl = plugin.getConfig().getString("links.mutes", "www.spfeast.cn/mutes");
+        if (mutesUrl == null) {
+            mutesUrl = "";
+        }
+
+        List<String> output = new ArrayList<>(rendered.size());
+        for (String line : rendered) {
+            output.add(line.replace("%MUTES_URL%", mutesUrl));
+        }
+        return output;
     }
 
     public void sendMuteMessage(Player player, MuteEntry entry) {

@@ -244,7 +244,30 @@ public final class BanService {
                 entry.getNumericId(),
                 formatInstant(entry.getCreatedAtMillis())
         );
+        rendered = applyConfiguredLinks(rendered);
         return String.join("\n", rendered);
+    }
+
+    private List<String> applyConfiguredLinks(List<String> lines) {
+        String appealUrl = plugin.getConfig().getString("links.appeal", "https://www.spfeast.cn/appeal");
+        String rulesUrl = plugin.getConfig().getString("links.rules", "https://www.spfeast.cn/rules");
+        String securityBlockUrl = plugin.getConfig().getString("links.security-block", "https://www.spfeast.cn/security-block");
+        String supportUrl = plugin.getConfig().getString("links.support", "https://support.spfeast.cn");
+        String supportHost = plugin.getConfig().getString("links.support-host", "support.spfeast.cn");
+        String contactEmail = plugin.getConfig().getString("contacts.email", "spfeast@icloud.com");
+
+        List<String> output = new ArrayList<>(lines.size());
+        for (String line : lines) {
+            String replaced = line;
+            replaced = replaced.replace("%APPEAL_URL%", appealUrl == null ? "" : appealUrl);
+            replaced = replaced.replace("%RULES_URL%", rulesUrl == null ? "" : rulesUrl);
+            replaced = replaced.replace("%SECURITY_BLOCK_URL%", securityBlockUrl == null ? "" : securityBlockUrl);
+            replaced = replaced.replace("%SUPPORT_URL%", supportUrl == null ? "" : supportUrl);
+            replaced = replaced.replace("%SUPPORT_HOST%", supportHost == null ? "" : supportHost);
+            replaced = replaced.replace("%CONTACT_EMAIL%", contactEmail == null ? "" : contactEmail);
+            output.add(replaced);
+        }
+        return output;
     }
 
     public String formatCreatedAt(BanEntry entry) {

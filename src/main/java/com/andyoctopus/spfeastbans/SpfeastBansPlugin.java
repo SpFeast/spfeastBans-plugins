@@ -20,6 +20,9 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 public final class SpfeastBansPlugin extends JavaPlugin {
@@ -33,15 +36,30 @@ public final class SpfeastBansPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
 
-        this.banStorage = new BanStorage(new File(getDataFolder(), "bans.yml"));
+        File realtimeDir = new File(getDataFolder(), "realtime");
+        File historyDir = new File(getDataFolder(), "history");
+        ensureDirectory(realtimeDir);
+        ensureDirectory(historyDir);
+
+        File bansFile = new File(realtimeDir, "bans.yml");
+        migrateLegacyFile("bans.yml", bansFile);
+        this.banStorage = new BanStorage(bansFile);
         this.banStorage.load();
-        this.banHistoryStorage = new BanHistoryStorage(new File(getDataFolder(), "bans-history.yml"));
+        File bansHistoryFile = new File(historyDir, "bans-history.yml");
+        migrateLegacyFile("bans-history.yml", bansHistoryFile);
+        this.banHistoryStorage = new BanHistoryStorage(bansHistoryFile);
         this.banHistoryStorage.load();
         this.banService = new BanService(this, banStorage, banHistoryStorage);
-        this.muteStorage = new MuteStorage(new File(getDataFolder(), "mutes.yml"));
+        File mutesFile = new File(realtimeDir, "mutes.yml");
+        migrateLegacyFile("mutes.yml", mutesFile);
+        this.muteStorage = new MuteStorage(mutesFile);
         this.muteStorage.load();
-        this.muteHistoryStorage = new MuteHistoryStorage(new File(getDataFolder(), "mutes-history.yml"));
+        File mutesHistoryFile = new File(historyDir, "mutes-history.yml");
+        migrateLegacyFile("mutes-history.yml", mutesHistoryFile);
+        this.muteHistoryStorage = new MuteHistoryStorage(mutesHistoryFile);
         this.muteHistoryStorage.load();
         this.muteService = new MuteService(this, muteStorage, muteHistoryStorage);
 
@@ -110,5 +128,28 @@ public final class SpfeastBansPlugin extends JavaPlugin {
     private PluginCommand requireCommand(String name) {
         return Objects.requireNonNull(getCommand(name), () -> "Missing command in plugin.yml: " + name);
     }
-}
 
+    private void ensureDirectory(File directory) {
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+    }
+
+    private void migrateLegacyFile(String legacyName, File target) {
+        File legacyFile = new File(getDataFolder(), legacyName);
+        if (!legacyFile.exists() || target.exists()) {
+            return;
+        }
+
+        File parent = target.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+
+        try {
+            Files.move(legacyFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException exception) {
+            getLogger().warning("Failed to migrate legacy file " + legacyFile.getName() + " to " + target.getPath() + ": " + exception.getMessage());
+        }
+    }
+}

@@ -64,10 +64,10 @@ spfeastBans 是一个面向 **Paper / Purpur 1.21+** 的封禁与禁言插件，
 ## 数据文件
 插件运行后会在 `plugins/spfeastBans/` 下生成和维护以下文件：
 
-- `bans.yml`：当前生效 ban
-- `bans-history.yml`：ban 历史记录
-- `mutes.yml`：当前生效 mute
-- `mutes-history.yml`：mute 历史记录
+- `realtime/bans.yml`：当前生效 ban
+- `history/bans-history.yml`：ban 历史记录
+- `realtime/mutes.yml`：当前生效 mute
+- `history/mutes-history.yml`：mute 历史记录
 - `config.yml`：基础配置
 
 ## 配置项
@@ -76,6 +76,8 @@ spfeastBans 是一个面向 **Paper / Purpur 1.21+** 的封禁与禁言插件，
 - `default-reason-fallback`：未提供原因时的默认文案
 - `permanent-text`：永久处罚显示文本
 - `date-format`：时间格式
+- `links.*`：处罚提示内的链接（ban / mute）
+- `contacts.email`：处罚提示内的联系邮箱
 
 当前默认值：
 
@@ -83,6 +85,15 @@ spfeastBans 是一个面向 **Paper / Purpur 1.21+** 的封禁与禁言插件，
 default-reason-fallback: "No reason provided"
 permanent-text: "permanent"
 date-format: "yyyy-MM-dd HH:mm"
+links:
+  appeal: "https://www.spfeast.cn/appeal"
+  rules: "https://www.spfeast.cn/rules"
+  security-block: "https://www.spfeast.cn/security-block"
+  support: "https://support.spfeast.cn"
+  support-host: "support.spfeast.cn"
+  mutes: "www.spfeast.cn/mutes"
+contacts:
+  email: "spfeast@icloud.com"
 ```
 
 ## 时长格式
@@ -137,4 +148,3 @@ Windows:
 ## 兼容性
 - 平台：Paper / Purpur
 - 版本：1.21 及以上
-

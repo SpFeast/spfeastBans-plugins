@@ -1,3 +1,12 @@
 default-reason-fallback: "No reason provided"
 permanent-text: "permanent"
 date-format: "yyyy-MM-dd HH:mm"
+links:
+  appeal: "https://www.spfeast.cn/appeal"
+  rules: "https://www.spfeast.cn/rules"
+  security-block: "https://www.spfeast.cn/security-block"
+  support: "https://support.spfeast.cn"
+  support-host: "support.spfeast.cn"
+  mutes: "www.spfeast.cn/mutes"
+contacts:
+  email: "spfeast@icloud.com"
