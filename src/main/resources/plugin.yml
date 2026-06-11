@@ -37,6 +37,10 @@ commands:
     description: Show punishment history for a player.
     usage: /history <player> [page]
     permission: spfeastbans.history
+  spfeastbans:
+    description: Reload spfeastBans config and data.
+    usage: /spfeastbans reload
+    permission: spfeastbans.reload
 permissions:
   spfeastbans.ban:
     default: op
@@ -56,4 +60,5 @@ permissions:
     default: op
   spfeastbans.staffview:
     default: op
-
+  spfeastbans.reload:
+    default: op

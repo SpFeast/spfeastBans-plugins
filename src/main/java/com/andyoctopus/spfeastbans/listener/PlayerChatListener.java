@@ -13,15 +13,14 @@ import java.util.Optional;
 
 public final class PlayerChatListener implements Listener {
     private final SpfeastBansPlugin plugin;
-    private final MuteService muteService;
 
-    public PlayerChatListener(SpfeastBansPlugin plugin, MuteService muteService) {
+    public PlayerChatListener(SpfeastBansPlugin plugin) {
         this.plugin = plugin;
-        this.muteService = muteService;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerChat(AsyncChatEvent event) {
+        MuteService muteService = plugin.getMuteService();
         Optional<MuteEntry> entryOptional = muteService.findActiveMute(event.getPlayer().getUniqueId());
         if (entryOptional.isEmpty()) {
             return;

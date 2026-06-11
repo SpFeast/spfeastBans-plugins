@@ -7,6 +7,7 @@ import com.andyoctopus.spfeastbans.command.BanCommand;
 import com.andyoctopus.spfeastbans.command.BanInfoCommand;
 import com.andyoctopus.spfeastbans.command.BanListCommand;
 import com.andyoctopus.spfeastbans.command.HistoryCommand;
+import com.andyoctopus.spfeastbans.command.SpfeastBansCommand;
 import com.andyoctopus.spfeastbans.command.TempMuteCommand;
 import com.andyoctopus.spfeastbans.command.UnbanCommand;
 import com.andyoctopus.spfeastbans.command.UnmuteCommand;
@@ -64,11 +65,10 @@ public final class SpfeastBansPlugin extends JavaPlugin {
         this.muteService = new MuteService(this, muteStorage, muteHistoryStorage);
 
         registerCommands();
-        getServer().getPluginManager().registerEvents(new PlayerLoginListener(banService), this);
-        getServer().getPluginManager().registerEvents(new PlayerChatListener(this, muteService), this);
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this, muteService), this);
-        getServer().getScheduler().runTaskTimer(this, banService::cleanupExpiredBans, 20L * 60L, 20L * 300L);
-        getServer().getScheduler().runTaskTimer(this, muteService::cleanupExpiredMutes, 20L * 60L, 20L * 300L);
+        getServer().getPluginManager().registerEvents(new PlayerLoginListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        scheduleCleanupTasks();
 
         getLogger().info("spfeastBans enabled. Active bans: " + banService.getActiveBanCount());
     }
@@ -97,6 +97,30 @@ public final class SpfeastBansPlugin extends JavaPlugin {
         return muteService;
     }
 
+    public void reloadPlugin() {
+        reloadConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+
+        if (banStorage != null) {
+            banStorage.load();
+        }
+        if (banHistoryStorage != null) {
+            banHistoryStorage.load();
+        }
+        if (muteStorage != null) {
+            muteStorage.load();
+        }
+        if (muteHistoryStorage != null) {
+            muteHistoryStorage.load();
+        }
+
+        this.banService = new BanService(this, banStorage, banHistoryStorage);
+        this.muteService = new MuteService(this, muteStorage, muteHistoryStorage);
+        getServer().getScheduler().cancelTasks(this);
+        scheduleCleanupTasks();
+    }
+
     private void registerCommands() {
         BanCommand banCommand = new BanCommand(this, false);
         BanCommand tempBanCommand = new BanCommand(this, true);
@@ -106,6 +130,7 @@ public final class SpfeastBansPlugin extends JavaPlugin {
         BanInfoCommand banInfoCommand = new BanInfoCommand(this);
         BanListCommand banListCommand = new BanListCommand(this);
         HistoryCommand historyCommand = new HistoryCommand(this);
+        SpfeastBansCommand spfeastBansCommand = new SpfeastBansCommand(this);
 
         requireCommand("ban").setExecutor(banCommand);
         requireCommand("ban").setTabCompleter(banCommand);
@@ -123,10 +148,25 @@ public final class SpfeastBansPlugin extends JavaPlugin {
         requireCommand("banlist").setTabCompleter(banListCommand);
         requireCommand("history").setExecutor(historyCommand);
         requireCommand("history").setTabCompleter(historyCommand);
+        requireCommand("spfeastbans").setExecutor(spfeastBansCommand);
+        requireCommand("spfeastbans").setTabCompleter(spfeastBansCommand);
     }
 
     private PluginCommand requireCommand(String name) {
         return Objects.requireNonNull(getCommand(name), () -> "Missing command in plugin.yml: " + name);
+    }
+
+    private void scheduleCleanupTasks() {
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            if (banService != null) {
+                banService.cleanupExpiredBans();
+            }
+        }, 20L * 60L, 20L * 300L);
+        getServer().getScheduler().runTaskTimer(this, () -> {
+            if (muteService != null) {
+                muteService.cleanupExpiredMutes();
+            }
+        }, 20L * 60L, 20L * 300L);
     }
 
     private void ensureDirectory(File directory) {
