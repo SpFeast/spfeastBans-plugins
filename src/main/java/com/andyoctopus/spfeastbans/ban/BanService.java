@@ -64,7 +64,6 @@ public final class BanService {
         storage.save();
         historyStorage.append(entry);
         historyStorage.save();
-        kickIfOnline(entry);
         return entry;
     }
 
@@ -318,7 +317,7 @@ public final class BanService {
         return rawReason;
     }
 
-    private void kickIfOnline(BanEntry entry) {
+    public void kickIfOnline(BanEntry entry) {
         Player player = Bukkit.getPlayer(entry.getUniqueId());
         if (player != null && player.isOnline()) {
             player.kickPlayer(buildKickMessage(entry));

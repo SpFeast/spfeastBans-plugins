@@ -69,6 +69,7 @@ public final class BanCommand implements TabExecutor {
         String reason = banService.resolveReason(template, collectReason(args, reasonIndex));
         BanEntry entry = banService.ban(target.uniqueId(), target.playerName(), args[1], reason, sender.getName(), expiresAtMillis);
         CommandMessages.broadcastPublicRemoval(entry.getPlayerName(), sender);
+        banService.kickIfOnline(entry);
         CommandMessages.sendStaffBanSummary(sender, banService, entry);
         return true;
     }

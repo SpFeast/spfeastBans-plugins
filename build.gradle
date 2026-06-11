@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.andyoctopus'
-version = '3.0.1-SNAPSHOT'
+version = '3.1.0'
 
 def targetJavaVersion = 21
 
