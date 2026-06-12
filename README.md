@@ -97,10 +97,9 @@ spfeastBans 是一个面向 **Paper / Purpur 1.21+** 的封禁与禁言插件，
 .\gradlew.bat build
 ```
 
-### 产物
+### 文件
 
 - `spfeastbans-purpur-26.1.0.jar`
-- `spfeastapi-26.1.0.jar`
 
 ## 兼容性
 
