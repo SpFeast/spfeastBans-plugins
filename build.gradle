@@ -41,3 +41,30 @@ jar {
     archiveBaseName = 'spfeastbans-purpur'
 }
 
+sourceSets {
+    spfeastapi {
+        java.setSrcDirs(['src/spfeastapi/java'])
+        resources.setSrcDirs(['src/spfeastapi/resources'])
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+    }
+}
+
+tasks.named('processSpfeastapiResources') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset = 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+tasks.register('spfeastApiJar', Jar) {
+    archiveBaseName = 'spfeastapi'
+    archiveVersion = version
+    from sourceSets.spfeastapi.output
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('spfeastApiJar')
+}

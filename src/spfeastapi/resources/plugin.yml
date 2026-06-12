@@ -1,0 +1,7 @@
+name: spfeastApi
+version: ${version}
+main: com.andyoctopus.spfeastapi.SpfeastApiPlugin
+api-version: '1.21'
+authors: [AndyOctopus]
+description: Bridge API plugin for spfeastBans.
+depend: [spfeastBans]
